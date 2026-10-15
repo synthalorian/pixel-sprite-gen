@@ -1,0 +1,25 @@
+[package]
+name = "pixel-sprite-gen"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.91"
+license = "LicenseRef-Proprietary"
+publish = false
+description = "Palette-locked pixel-art sprite generator"
+
+[lib]
+name = "spritegen"
+
+[[bin]]
+name = "sprite"
+path = "src/main.rs"
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }
+palette = { version = "0.7", default-features = false, features = ["std"] }
+rand = { version = "0.8", default-features = false, features = ["std"] }
+rand_chacha = "0.3"
+clap = { version = "4", features = ["derive"] }
+
+[profile.dev.package."*"]
+opt-level = 2
