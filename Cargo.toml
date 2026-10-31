@@ -15,11 +15,17 @@ name = "sprite"
 path = "src/main.rs"
 
 [dependencies]
-image = { version = "0.25", default-features = false, features = ["png"] }
+image = { version = "0.25", default-features = false, features = ["png", "gif", "webp"] }
 palette = { version = "0.7", default-features = false, features = ["std"] }
 rand = { version = "0.8", default-features = false, features = ["std"] }
 rand_chacha = "0.3"
 clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+gif = "0.14"
 
 [profile.dev.package."*"]
 opt-level = 2
+
+[dev-dependencies]
+image-webp = "0.2"
