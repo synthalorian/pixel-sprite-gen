@@ -40,27 +40,36 @@ pub fn grid_cells(width: u32, height: u32, g: &Grid) -> Result<Vec<Rect>, String
     if g.cell_w == 0 || g.cell_h == 0 {
         return Err("cell size must be non-zero".into());
     }
-    let fit = |total: u32, cell: u32| -> u32 {
-        let avail = total.saturating_sub(2 * g.margin);
+    // Checked: `cell + spacing` can wrap (and then divide by zero) for huge spacing values.
+    let step = |cell: u32| {
+        cell.checked_add(g.spacing).ok_or(format!(
+            "cell size {cell} + spacing {} overflows",
+            g.spacing
+        ))
+    };
+    let (step_w, step_h) = (step(g.cell_w)?, step(g.cell_h)?);
+    let fit = |total: u32, cell: u32, step: u32| -> u32 {
+        let avail = total.saturating_sub(g.margin.saturating_mul(2));
         if avail < cell {
             0
         } else {
-            (avail - cell) / (cell + g.spacing) + 1
+            (avail - cell) / step + 1
         }
     };
-    let (cols, rows) = (fit(width, g.cell_w), fit(height, g.cell_h));
+    let (cols, rows) = (fit(width, g.cell_w, step_w), fit(height, g.cell_h, step_h));
     if cols == 0 || rows == 0 {
         return Err(format!(
             "no {}x{} cells fit in a {width}x{height} image with margin {}",
             g.cell_w, g.cell_h, g.margin
         ));
     }
+    // Every cell fits inside the image, so these offsets cannot overflow.
     Ok((0..rows)
         .flat_map(|r| {
             (0..cols).map(move |c| {
                 Rect::new(
-                    g.margin + c * (g.cell_w + g.spacing),
-                    g.margin + r * (g.cell_h + g.spacing),
+                    g.margin + c * step_w,
+                    g.margin + r * step_h,
                     g.cell_w,
                     g.cell_h,
                 )

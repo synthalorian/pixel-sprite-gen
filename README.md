@@ -74,16 +74,16 @@ sprite slice alpha loose.png --merge-gap 2 --min-pixels 4 --duration 80,80,120 -
   current row.
 - `--duration` takes one value for every frame or exactly one per frame. `--alpha-threshold`
   (default 0) sets the alpha above which a pixel counts as opaque.
-- `--frames-dir DIR` also writes each frame, untrimmed, as `DIR/<name>.png`.
+- `--frames-dir DIR` also writes each frame, untrimmed, as `DIR/<filename>.png`.
 
 The atlas follows TexturePacker's JSON-array layout plus `duration`. Array order is
-playback order. `meta.image` is the sheet path relative to the atlas file.
+playback order. Frames are keyed by `filename` (atlases using `name` are still read). `meta.image` is the sheet path relative to the atlas file.
 
 ```json
 {
   "frames": [
     {
-      "name": "walk_0",
+      "filename": "walk_0",
       "frame": { "x": 3, "y": 4, "w": 10, "h": 12 },
       "trimmed": true,
       "spriteSourceSize": { "x": 2, "y": 3, "w": 10, "h": 12 },

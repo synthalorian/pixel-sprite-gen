@@ -77,6 +77,23 @@ fn grid_cells_respect_margin_and_spacing() {
     assert!(slice::grid_cells(30, 19, &Grid { cell_w: 0, ..g }).is_err());
 }
 
+#[test]
+fn grid_cells_reject_overflowing_spacing() {
+    let g = Grid {
+        cell_w: 1,
+        cell_h: 1,
+        margin: 0,
+        spacing: u32::MAX,
+    };
+    assert!(slice::grid_cells(8, 8, &g).is_err());
+    let huge_margin = Grid {
+        margin: u32::MAX,
+        spacing: 0,
+        ..g
+    };
+    assert!(slice::grid_cells(8, 8, &huge_margin).is_err());
+}
+
 fn grid_sheet() -> RgbaImage {
     // 3x1 cells of 8x8, margin 1, spacing 2. Cell 1 is empty.
     let pal = gb4();
@@ -221,6 +238,7 @@ fn atlas_json_round_trip_and_durations() {
     );
     let json = a.to_json();
     for key in [
+        "\"filename\": \"frame_1\"",
         "\"spriteSourceSize\"",
         "\"sourceSize\"",
         "\"pivot\"",
@@ -230,7 +248,11 @@ fn atlas_json_round_trip_and_durations() {
         assert!(json.contains(key), "missing {key}");
     }
     assert_eq!(Atlas::from_json(&json).unwrap(), a);
+    assert!(!json.contains("\"name\""));
     assert!(Atlas::from_json(&json.replace("\"w\": 3", "\"w\": 30")).is_err());
+    // Atlases written with the old `name` key still load.
+    let legacy = json.replace("\"filename\":", "\"name\":");
+    assert_eq!(Atlas::from_json(&legacy).unwrap(), a);
 
     let three = SliceOptions {
         durations: vec![1, 2, 3],
@@ -536,6 +558,22 @@ fn cli_slice_verify_anim_pipeline() {
         "{}",
         String::from_utf8_lossy(&out.stderr)
     );
+    let out = sprite(&[
+        "slice",
+        "grid",
+        &p("sheet.png"),
+        "--cell",
+        "1",
+        "--spacing",
+        "4294967295",
+        "-o",
+        &p("overflow.json"),
+    ]);
+    assert!(!out.status.success());
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(stderr.contains("overflows"), "{stderr}");
+    assert!(!stderr.contains("panicked"), "{stderr}");
+
     let atlas = Atlas::from_json(&std::fs::read_to_string(p("sheet.json")).unwrap()).unwrap();
     assert_eq!(atlas.meta.image, "sheet.png");
     assert_eq!(atlas.frames.len(), 4);

@@ -99,6 +99,8 @@ impl std::str::FromStr for Pivot {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AtlasFrame {
+    /// Serialised as TexturePacker's `filename`; `name` is accepted when reading.
+    #[serde(rename = "filename", alias = "name")]
     pub name: String,
     /// Region of the sheet holding the (possibly trimmed) pixels.
     pub frame: Rect,
