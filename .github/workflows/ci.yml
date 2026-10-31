@@ -21,3 +21,8 @@ jobs:
         run: |
           cargo run --locked -q -- sheet --kind creature --size 16 --count 8 --palette gb4 -o /tmp/s.png
           test -s /tmp/s.png && test -s /tmp/s.json
+          cargo run --locked -q -- verify /tmp/s.png --palette gb4
+          cargo run --locked -q -- slice grid /tmp/s.png --cell 16 --pivot 0.5,1 -o /tmp/s-frames.json
+          cargo run --locked -q -- anim --atlas /tmp/s-frames.json --scale 4 -o /tmp/s.gif
+          cargo run --locked -q -- anim --atlas /tmp/s-frames.json --scale 4 -o /tmp/s.webp
+          test -s /tmp/s.gif && test -s /tmp/s.webp
