@@ -2,6 +2,16 @@ use image::{Rgba, RgbaImage};
 use palette::{IntoColor, Oklab, Srgb};
 use std::path::Path;
 
+/// A pixel that is neither fully transparent nor an exact opaque palette colour.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct OffPixel {
+    pub x: u32,
+    pub y: u32,
+    pub rgba: [u8; 4],
+    /// Closest palette colour (OKLab), as a fix-up hint.
+    pub nearest: [u8; 3],
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Palette {
     pub name: String,
@@ -166,6 +176,19 @@ impl Palette {
 
     pub fn contains(&self, c: [u8; 3]) -> bool {
         self.colors.contains(&c)
+    }
+
+    /// Every pixel that violates the palette lock (see [`Palette::check_image`]), in raster order.
+    pub fn off_palette(&self, img: &RgbaImage) -> Vec<OffPixel> {
+        img.enumerate_pixels()
+            .filter(|(_, _, p)| p[3] != 0 && (p[3] != 255 || !self.contains([p[0], p[1], p[2]])))
+            .map(|(x, y, p)| OffPixel {
+                x,
+                y,
+                rgba: p.0,
+                nearest: self.colors[self.nearest([p[0], p[1], p[2]])],
+            })
+            .collect()
     }
 
     /// Every pixel must be fully transparent or an exact opaque palette colour.
