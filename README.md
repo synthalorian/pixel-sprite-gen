@@ -198,4 +198,4 @@ end to end: verify, then slice, then anim. All test images are small geometric s
 
 ## Licence
 
-Proprietary. See `LICENSE`.
+MIT. See `LICENSE`.

@@ -3,7 +3,7 @@ name = "pixel-sprite-gen"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.91"
-license = "LicenseRef-Proprietary"
+license = "MIT"
 publish = false
 description = "Palette-locked pixel-art sprite generator"
 
